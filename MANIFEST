@@ -1,0 +1,9 @@
+Changes
+lib/File/Lock/Multi.pm
+lib/File/Lock/Multi/Fuser.pm
+Makefile.PL
+MANIFEST
+META.yml
+README
+t/100-fuser-simple.t
+t/200-fuser-forks.t

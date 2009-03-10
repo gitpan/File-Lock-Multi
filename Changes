@@ -1,0 +1,6 @@
+Revision history for Perl extension Lock::Multi.
+
+0.01  Mon Mar  9 09:28:20 2009
+	- original version; created by h2xs 1.23 with options
+		-AXP -b 5.6.0 Lock::Multi
+
