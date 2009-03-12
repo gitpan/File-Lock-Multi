@@ -1,4 +1,9 @@
-Revision history for Perl extension Lock::Multi.
+Revision history for Perl extension Fil::Lock::Multi.
+
+0.02  Thu Mar 12 15:21:00 2009
+    - Factored out an explicit base class for File::Lock::Multi objects
+    - Fixed a bug that made it impossible to tell how many lockers a
+      file has unless you also have a lock.
 
 0.01  Mon Mar  9 09:28:20 2009
 	- original version; created by h2xs 1.23 with options

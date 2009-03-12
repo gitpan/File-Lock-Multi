@@ -68,7 +68,7 @@ sub _fds {
   my $self = shift;
   my $proc = shift;
   my $dir_name = "/proc/$proc/fd";
-  my @stat = stat($self->_fh)
+  my @stat = stat($self->_fh || $self->file)
     or croak "stat ", $self->file, ": $!";
   my @fds_out = ();
 

@@ -2,108 +2,13 @@ package File::Lock::Multi;
 
 use 5.006000;
 use strict;
-use warnings;
-use Class::Accessor;
-use base q(Class::Accessor);
-use Time::HiRes qw(sleep);
-use Carp qw(croak);
-use Params::Validate;
-use Params::Classify qw(is_number);
+use warnings (FATAL => 'all');
+use File::Lock::Multi::Base;
+use base q(File::Lock::Multi::Base);
 
-our $VERSION = '0.01';
-
-__PACKAGE__->mk_accessors(qw(max file timeout polling_interval));
+our $VERSION = '0.02';
 
 return 1;
-
-sub new {
-  my $class = shift;
-
-  croak "$class is a base class; please find a suitable subclass to use"
-    if $class eq __PACKAGE__;
-
-  my $float_spec = { optional => 1, callbacks => { number => \&is_number } };
-  my $integer_spec = { optional => 1, regex => qr/^\d+$/ };
-
-  my %args = validate(@_, {
-    file => 1,
-    polling_interval => $float_spec,
-    timeout => $float_spec,
-    max => $integer_spec
-  });
-
-  $args{polling_interval} ||= 0.2;
-  $args{timeout} = -1 unless defined $args{timeout};
-  $args{max} ||= 1;
-
-  return $class->SUPER::new(\%args);
-}
-
-sub lockable {
-  my $self = shift;
-  if($self->lock(0)) {
-    return $self->release;
-  } else {
-    return;
-  }
-}
-
-sub _lock_non_block {
-  my $self = shift;
-
-  croak("i already have a lock on ", $self->file) if $self->locked;
-
-  if(my $id = $self->_lock) {
-    if($self->lockers > $self->max) {
-      $self->release;
-      return;
-    } else {
-      return $id;
-    }
-  } else {
-    return;
-  }
-}
-
-sub lock {
-  my $self = shift;
-
-  my $timeout = scalar(@_) ? shift : $self->timeout;
-  return $self->_lock_non_block unless $timeout;
-
-  my $polling_interval = $self->polling_interval;
-
-  if($timeout < 0) {
-    while(1) {
-      if(my $id = $self->_lock_non_block) {
-        return $id;
-      } else {
-        sleep($polling_interval);
-      }
-    }
-  } else {
-    my $cycles = $timeout / $polling_interval;
-    if($cycles < 1) {
-      $cycles = 1;
-      $polling_interval = $timeout;
-    }
-
-    while($cycles) {
-      if(my $id = $self->_lock_non_block) {
-        return $id;
-      } else {
-        sleep($polling_interval);
-        $cycles --;
-      }
-    }
-  }
-}
-
-sub release {
-  my $self = shift;
-  croak("i do not have a lock on ", $self->file) unless $self->locked;
-  return $self->_release;
-}
 
 __END__
 
