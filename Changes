@@ -1,4 +1,16 @@
-Revision history for Perl extension Fil::Lock::Multi.
+Revision history for Perl extension File::Lock::Multi.
+
+0.03  Thu Mar 19 18:30:00 2009
+    - Under linux, depend on Linux::Fuser 1.5, since it allows
+      us to see the file descriptor numbers that a process is accessing
+      a file under (#43979)
+    - Created a class for 'iterative' lockers; this is useful in
+      environments that don't support fuser, as well as environments
+      where you may not have permissions to do a proper fuser check
+      (eg; different user-id's wanting to lock the same file).
+    - Created an "FlockFiles" class that emulates multi-locks by
+      maintaining multiple lock files based off of a name
+      ("lockfile.1", "lockfile.2", etc)
 
 0.02  Thu Mar 12 15:21:00 2009
     - Factored out an explicit base class for File::Lock::Multi objects

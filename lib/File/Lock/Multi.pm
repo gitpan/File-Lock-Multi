@@ -6,7 +6,7 @@ use warnings (FATAL => 'all');
 use File::Lock::Multi::Base;
 use base q(File::Lock::Multi::Base);
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 return 1;
 
@@ -72,11 +72,12 @@ that you can specify how many locks are allowed to be taken out. So long
 as each process agrees on the maximum number of locks, they can work in
 parallel, but within the limits you have specified.
 
-The current locking mechanism is only expected to work on linux (since it
-makes use of linux's "/proc" filesystem), but it has been written in such
-a way that it should be easy to create lockers for other OS'es as well.
-See L<File::Lock::Multi::Fuser> for some more technical details about
-this implementation.
+There are currently two locking mechanisms available;
+L<File::Lock::Multi::Fuser> allows you to have multi-locks using just
+one file, but only works on linux and has some drawbacks (see the
+documentation for details); L<File::Lock::Multi::FlockFiles> uses
+the C<flock()> call on several files named after the file you specify
+in order to emulate allowing more than one lock.
 
 =head1 CONSTRUCTOR
 
@@ -91,7 +92,7 @@ the "release" method, or when the object falls out of scope.
 
 Note that you cannot call new directly on C<File::Lock::Multi>, you
 must do so on a particular implementation such as
-L<File::Lock::Multi::Fuser>.
+L<File::Lock::Multi::Fuser> or L<File::Lock::Multi::FlockFiles>
 
 "new" takes the following parameters; only "file" is required:
 
@@ -197,6 +198,9 @@ itself.
 
 L<File::Lock::Multi::Fuser> for technical details about the linux /proc
 implementation.
+
+L<File::Lock::Multi::FlockFiles> for technical details about the
+multiple-file implementation.
 
 L<IPC::Locker> for a network-based locking solution that kind-of
 supports the same thing via an internet daemon ("Multiple locks may be

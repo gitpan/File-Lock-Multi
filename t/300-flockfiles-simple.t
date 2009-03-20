@@ -2,29 +2,21 @@
 
 use strict;
 use warnings (FATAL => 'all');
-use Test::More;
+use Test::More qw(no_plan);
 use Test::Exception;
 use File::Temp qw(tmpnam);
 use File::Lock::Multi;
+use File::Lock::Multi::FlockFiles;
 use Time::HiRes qw(time);
-
-eval {
-  use Linux::Fuser;
-};
-
-if($@) {
-  plan skip_all => "Linux::Fuser is not installed";
-} else {
-  eval { use File::Lock::Multi::Fuser; 1; } or die $@;
-  plan tests => 30;
-}
 
 my $file = tmpnam;
 my @lockers;
 
 foreach (1 .. 6) {
-  push(@lockers, File::Lock::Multi::Fuser->new(file => $file, max => 5, timeout => 0));
+  push(@lockers, File::Lock::Multi::FlockFiles->new(file => $file, max => 5, timeout => 0));
 }
+
+$lockers[4]->clean(0);
 
 diag("non-blocking locks");
 throws_ok { $lockers[0]->release } qr/i do not have a lock/,
@@ -37,12 +29,47 @@ is($lockers[0]->lockers, 2);
 ok($lockers[2]->lock);
 throws_ok { $lockers[2]->lock } qr/i already have a lock/,
   "can't double-lock";
+throws_ok { $lockers[2]->lock_non_block_for(2) }
+  qr/lock_non_block_for called while already locked/,
+  "can't double-lock (internal)";
 is($lockers[0]->lockers, 3);
 ok($lockers[3]->lock);
 is($lockers[0]->lockers, 4);
 ok($lockers[4]->lock);
 ok(!$lockers[5]->lock);
 ok(!$lockers[5]->locked);
+
+my $path = $lockers[0]->path;
+ok(-e $path, "locker path exists when we are locked");
+$lockers[0]->release;
+ok(!-e $path, "locker path doesnt exist after unlock");
+$lockers[0]->lock;
+
+$path = $lockers[4]->path;
+ok(-e $path, "locker path exists when we are locked (2)");
+$lockers[4]->release;
+ok(-e $path, "locker path still exists after unlock because we dont want it clean");
+$lockers[4]->lock;
+$lockers[4]->clean(1);
+
+$lockers[3]->_mine(0);
+$path = $lockers[3]->path;
+ok(-e $path, "locker path exists when we are locked (3)");
+$lockers[3]->release;
+ok(-e $path, "locker path still exists after unlock because it is not ours (mocked)");
+$lockers[3]->lock;
+
+$lockers[2]->_mine(0);
+$lockers[2]->clean(2);
+$path = $lockers[2]->path;
+ok(-e $path, "locker path exists when we are locked (4)");
+$lockers[2]->release;
+ok(!-e $path, "locker path doesnt exist after unlock due to aggressive cleaning (mocked)");
+$lockers[2]->clean(1);
+$lockers[2]->lock;
+
+
+
 
 diag("lock w/timeout");
 $lockers[5]->timeout(2);
@@ -72,12 +99,12 @@ ok(!$lockers[5]->lockable, 'lockability test never blocks');
 
 diag("obligatory coverage tests");
 
-ok(File::Lock::Multi::Fuser->new(file => $file), "base default args");
-dies_ok { File::Lock::Multi::Fuser->new } "file is required";
+ok(File::Lock::Multi::FlockFiles->new(file => $file), "base default args");
+dies_ok { File::Lock::Multi::FlockFiles->new } "file is required";
 throws_ok { File::Lock::Multi->new } qr/is a base class/,
     "Can't instantiate the base class directly";
 ok(
-  File::Lock::Multi::Fuser->new(file => $file, polling_interval => 2, timeout => 1),
+  File::Lock::Multi::FlockFiles->new(file => $file, polling_interval => 2, timeout => 1),
   "new()"
 );
 

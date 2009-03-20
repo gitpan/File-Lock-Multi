@@ -8,7 +8,7 @@ use warnings (FATAL => 'all');
 use File::Lock::Multi;
 use base q(File::Lock::Multi);
 
-use Linux::Fuser;
+use Linux::Fuser 1.5;
 use Carp q(croak);
 
 __PACKAGE__->mk_accessors(qw(_fuser _fh));
@@ -30,17 +30,11 @@ sub locked {
 sub lockers {
   my $self = shift;
   my @procs = $self->_fuser->fuser($self->file);
-  my(@ids) = ();
-  my %pids = map { ($_->pid => 1) } @procs;
-  my @pids = keys %pids;
-  foreach my $proc (@pids) {
-    my @fds = $self->_fds($proc)
-      or die "$proc has ", $self->file,
-        " open but I can't tell how many times!";
-
-    foreach my $fd (@fds) {
-      push(@ids, "$proc:$fd");
-    }
+  my @ids;
+  foreach my $proc (@procs) {
+    my $id = $proc->pid;
+    my $fd = $proc->filedes->fd;
+    push(@ids, "$id:$fd");
   }
   return @ids;
 }
@@ -62,30 +56,6 @@ sub _lock {
   } else {
     croak "open ", $self->file, " for write: $!";
   }
-}
-
-sub _fds {
-  my $self = shift;
-  my $proc = shift;
-  my $dir_name = "/proc/$proc/fd";
-  my @stat = stat($self->_fh || $self->file)
-    or croak "stat ", $self->file, ": $!";
-  my @fds_out = ();
-
-  if(opendir(my $dh, $dir_name)) {
-    my @fds_in = grep { /^\d+$/ } readdir $dh;
-    foreach my $fd (@fds_in) {
-      my @fd_stat = stat("$dir_name/$fd")
-        or croak "stat $dir_name/$fd: $!";
-      if($fd_stat[0] == $stat[0] && $fd_stat[1] == $stat[1]) {
-        push(@fds_out, $fd);
-      }
-    }
-  } else {
-    croak "opendir($dir_name): $!";
-  }
-
-  return @fds_out;
 }
 
 __END__

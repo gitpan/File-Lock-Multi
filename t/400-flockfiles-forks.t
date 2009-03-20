@@ -6,22 +6,14 @@ use Test::More;
 use Test::Exception;
 use File::Temp qw(tmpnam);
 use File::Lock::Multi;
+use File::Lock::Multi::FlockFiles;
 use Time::HiRes qw(time sleep);
 use Test::Fork;
 
 sub inner;
 sub outer;
 
-eval {
-  use Linux::Fuser;
-};
-
-if($@) {
-  plan skip_all => "Linux::Fuser is not installed";
-} else {
-  eval { use File::Lock::Multi::Fuser; 1; } or die $@;
-  plan tests => 7;
-}
+plan tests => 7;
 
 my $file = tmpnam;
 
@@ -32,7 +24,7 @@ if(my $kid = fork_ok(2, \&inner)) {
 }
 
 sub outer {
-  my $l = File::Lock::Multi::Fuser->new(file => $file);
+  my $l = File::Lock::Multi::FlockFiles->new(file => $file);
   ok($l->lock, "outer proc got a lock");
   diag("parent hanging onto lock to help child's test");
   sleep(2);
@@ -48,7 +40,7 @@ sub outer {
 }
 
 sub inner {
-  my $l = File::Lock::Multi::Fuser->new(file => $file);
+  my $l = File::Lock::Multi::FlockFiles->new(file => $file);
   sleep 1;
   diag("child waiting for lock to not be lockable");
   sleep(0.2) until !$l->lockable;
