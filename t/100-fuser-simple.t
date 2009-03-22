@@ -8,14 +8,12 @@ use File::Temp qw(tmpnam);
 use File::Lock::Multi;
 use Time::HiRes qw(time);
 
-eval {
-  use Linux::Fuser;
-};
+eval 'use Linux::Fuser 1.5';
 
 if($@) {
   plan skip_all => "Linux::Fuser is not installed";
 } else {
-  eval { use File::Lock::Multi::Fuser; 1; } or die $@;
+  eval 'use File::Lock::Multi::Fuser; 1' or die $@;
   plan tests => 30;
 }
 
