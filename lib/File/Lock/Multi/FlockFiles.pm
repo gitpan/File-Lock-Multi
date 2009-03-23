@@ -84,8 +84,13 @@ sub _release {
 
 sub _clean {
   my $self = shift;
-  if($self->_mine || $self->clean > 1) {
-    unlink($self->path);
+  $self->__clean($self->path, $self->_mine);
+}
+
+sub __clean {
+  my($self, $path, $mine) = @_;
+  if($mine || $self->clean > 1) {
+    unlink($path);
   }
 }
 
@@ -100,6 +105,7 @@ sub lock_path {
       return $fh;
     }
   } else {
+    $self->__clean($path, $mine) if $mine;
     return;
   }
 }
