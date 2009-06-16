@@ -14,11 +14,27 @@ if($@) {
   plan skip_all => "Linux::Fuser is not installed";
 } else {
   eval 'use File::Lock::Multi::Fuser; 1' or die $@;
-  plan tests => 30;
+  plan tests => 40;
 }
 
 my $file = tmpnam;
 my @lockers;
+
+{
+  diag("single-locking");
+  my $locker = File::Lock::Multi::Fuser->new(file => $file, max => 1, timeout => 1);
+  my $locker2 = File::Lock::Multi::Fuser->new(file => $file, max => 1, timeout => 1);
+  ok($locker->lock);
+  ok($locker->locked);
+  ok(!$locker2->lock(1));
+  ok(!$locker2->locked);
+  ok($locker->release);
+  ok($locker2->lock(1));
+  ok($locker2->locked);
+  ok(!$locker->locked);
+  ok(!$locker->lock(1));
+  ok($locker->lockers);
+}
 
 foreach (1 .. 6) {
   push(@lockers, File::Lock::Multi::Fuser->new(file => $file, max => 5, timeout => 0));

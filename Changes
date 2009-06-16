@@ -1,5 +1,9 @@
 Revision history for Perl extension File::Lock::Multi.
 
+0.06  Mon Jun 15 22:19:00 2009
+     - Fixed a problem with some versions of Params::Classify (or perl?)
+       treating subrouting references weirdly (RT#46965)
+
 0.05  Mon Mar 23 11:00:00 2009
      - Fixed "clean"ing logic in File::Lock::Multi::FlockFiles
 

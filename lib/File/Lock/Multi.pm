@@ -6,7 +6,7 @@ use warnings (FATAL => 'all');
 use File::Lock::Multi::Base;
 use base q(File::Lock::Multi::Base);
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 return 1;
 

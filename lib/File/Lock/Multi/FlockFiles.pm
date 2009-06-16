@@ -69,6 +69,7 @@ sub format_path {
 
 sub path {
   my $self = shift;
+  croak "can not obtain a path without an ID" unless defined $self->_id;
   return $self->format_path($self->_id);
 }
 

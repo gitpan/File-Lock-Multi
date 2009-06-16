@@ -17,7 +17,7 @@ return 1;
 sub __Validators {
   my $class = shift;
 
-  my $float_spec = { optional => 1, callbacks => { number => \&is_number } };
+  my $float_spec = { optional => 1, callbacks => { number => sub { is_number(@_) } } };
   my $integer_spec = { optional => 1, regex => qr/^\d+$/ };
 
   return(

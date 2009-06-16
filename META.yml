@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                File-Lock-Multi
-version:             0.05
+version:             0.06
 abstract:            Lock files more than once
 license:             perl
 author:              
