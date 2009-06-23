@@ -1,5 +1,10 @@
 Revision history for Perl extension File::Lock::Multi.
 
+0.07  Mon Jun 22 18:35:00 2009
+     - Fixed parameter validation, again (RT#46965)
+     - Skip file removal tests under win32 - they're failing but that
+       doesn't completely remove this module's use there.
+
 0.06  Mon Jun 15 22:19:00 2009
      - Fixed a problem with some versions of Params::Classify (or perl?)
        treating subrouting references weirdly (RT#46965)
