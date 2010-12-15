@@ -10,9 +10,12 @@ use Carp qw(croak);
 use Params::Validate;
 use Params::Classify qw(is_number);
 
-__PACKAGE__->mk_accessors(qw(max file timeout polling_interval));
+__PACKAGE__->mk_accessors(qw(max name timeout polling_interval));
 
 return 1;
+
+# rename file -> name to make more sense with virtual resources
+sub file { &name }
 
 sub __Validators {
   my $class = shift;
@@ -24,7 +27,7 @@ sub __Validators {
   my $integer_spec = { optional => 1, regex => qr/^\d+$/ };
 
   return(
-    file => 1,
+    name => 1,
     polling_interval => $float_spec,
     timeout => $float_spec,
     max => $integer_spec,
@@ -32,15 +35,20 @@ sub __Validators {
   );
 }
 
+
 sub new {
-  my $class = shift;
+  my($class, %args_in) = @_;
   (my $subclass = __PACKAGE__) =~ s{::Base$}{};
+
+  $args_in{name} = delete $args_in{file} if exists $args_in{file};
+  # silliness to accomodate Params::Validate
+  my @args_in = %args_in;
 
   croak "$class is a base class; please find a suitable subclass to use"
     if $class eq __PACKAGE__ || $class eq $subclass;
 
   my %validate_spec = $class->__Validators;
-  my %args = validate(@_, \%validate_spec);
+  my %args = validate(@args_in, \%validate_spec);
 
   $args{polling_interval} ||= 0.2;
   $args{timeout} = -1 unless defined $args{timeout};

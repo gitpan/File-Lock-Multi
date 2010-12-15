@@ -1,23 +1,32 @@
 --- #YAML:1.0
-name:                File-Lock-Multi
-version:             0.07
-abstract:            Lock files more than once
-license:             perl
-author:              
+name:               File-Lock-Multi
+version:            1.00
+abstract:           Lock files more than once
+author:
     - Tyler MacDonald <japh@crackerjack.net>
-generated_by:        ExtUtils::MakeMaker version 6.42
-distribution_type:   module
-requires:     
-    Carp:                          0
-    Class::Accessor:               0
-    Fcntl:                         0
-    File::Temp:                    0
-    Params::Classify:              0
-    Params::Validate:              0
-    Test::Exception:               0
-    Test::Fork:                    0
-    Test::More:                    0
-    Time::HiRes:                   0
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    Carp:              0
+    Class::Accessor:   0
+    Fcntl:             0
+    File::Temp:        0
+    Linux::Fuser:      1.5
+    Params::Classify:  0
+    Params::Validate:  0
+    Test::Exception:   0
+    Test::Fork:        0
+    Test::More:        0
+    Time::HiRes:       0
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.55_02
 meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
-    version: 1.3
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4

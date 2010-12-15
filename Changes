@@ -1,5 +1,10 @@
 Revision history for Perl extension File::Lock::Multi.
 
+0.08  Tue Dec 14 22:07:00 2010
+     - Changed parameter "file" to "name" so that it makes more sense
+       when locking things that aren't actually files.
+     - Added support for locking via MySQL's GET_LOCK() function.
+
 0.07  Mon Jun 22 18:35:00 2009
      - Fixed parameter validation, again (RT#46965)
      - Skip file removal tests under win32 - they're failing but that

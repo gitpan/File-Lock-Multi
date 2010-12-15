@@ -6,7 +6,7 @@ use warnings (FATAL => 'all');
 use File::Lock::Multi::Base;
 use base q(File::Lock::Multi::Base);
 
-our $VERSION = '0.07';
+our $VERSION = '1.00';
 
 return 1;
 
@@ -22,7 +22,7 @@ File::Lock::Multi - Lock files more than once
 
   use File::Lock::Multi::Fuser;
 
-  my $lock = File::Lock::Multi::Fuser->new(file => "/path/to/file", max => 3);
+  my $lock = File::Lock::Multi::Fuser->new(name => "/path/to/file", max => 3);
 
   $lock->lock or die;
   # no more than 3 locks have been taken out on "/path/to/file"
@@ -72,12 +72,14 @@ that you can specify how many locks are allowed to be taken out. So long
 as each process agrees on the maximum number of locks, they can work in
 parallel, but within the limits you have specified.
 
-There are currently two locking mechanisms available;
-L<File::Lock::Multi::Fuser> allows you to have multi-locks using just
-one file, but only works on linux and has some drawbacks (see the
-documentation for details); L<File::Lock::Multi::FlockFiles> uses
-the C<flock()> call on several files named after the file you specify
-in order to emulate allowing more than one lock.
+There are three locking mechanisms available; L<File::Lock::Multi::Fuser>
+allows you to have multi-locks using just one file, but only works on linux
+and has some drawbacks (see the documentation for details);
+L<File::Lock::Multi::FlockFiles> uses the C<flock()> call on several files
+named after the file you specify in order to emulate allowing more than one
+lock. L<File::Lock::Multi::MySQL> allows you to use a MySQL backend to
+take out multiple locks on a resource that is shared across multiple servers,
+using MySQL's GET_LOCK function.
 
 =head1 CONSTRUCTOR
 
@@ -92,17 +94,17 @@ the "release" method, or when the object falls out of scope.
 
 Note that you cannot call new directly on C<File::Lock::Multi>, you
 must do so on a particular implementation such as
-L<File::Lock::Multi::Fuser> or L<File::Lock::Multi::FlockFiles>
+L<File::Lock::Multi::Fuser> or L<File::Lock::Multi::MySQL>
 
 "new" takes the following parameters; only "file" is required:
 
 =over
 
-=item file
+=item name
 
-The name of the file you wish to lock; this parameter is required.
-If the file does not already exist, a zero-byte file will be created
-when you attempt to acquire the lock with L</lock>.
+The name of the resource you wish to lock; this parameter is required.
+When dealing with files, if the file does not already exist, a zero-byte
+file will be created when you attempt to acquire the lock with L</lock>.
 
 This parameter is required.
 
@@ -173,23 +175,9 @@ specific. :-)
 
 =back
 
-=head1 THANKS
-
-=over
-
-=item Jessica Doyle
-
-For the original idea.
-
-=item Amanda Nekurak
-
-For keeping the munchkins happy and occupied while I worked on this.
-
-=back
-
 =head1 LICENSE
 
-Copyright 2009 Tyler "Crackerjack" MacDonald <japh@crackerjack.net>
+Copyright 2010 Tyler "Crackerjack" MacDonald <japh@crackerjack.net>
 
 This is free software; You may distribute it under the same terms as perl
 itself.
@@ -202,9 +190,12 @@ implementation.
 L<File::Lock::Multi::FlockFiles> for technical details about the
 multiple-file implementation.
 
-L<IPC::Locker> for a network-based locking solution that kind-of
-supports the same thing via an internet daemon ("Multiple locks may be
-requested, in which case the first lock to be free will be used.")
+l<File::Lock::Multi::MySQL> for technical details about the MySQL
+implementation.
+
+L<IPC::Locker> for a network-based locking solution that may help if
+you don't want to use MySQL for distributed locking ("Multiple locks may
+be requested, in which case the first lock to be free will be used.")
 
 =cut
 

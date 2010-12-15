@@ -26,10 +26,15 @@ sub lockers {
   my @lockers = ();
   $self->_iterate(sub {
     my($me, $now) = @_;
-    push(@lockers, $now) unless($me->obtain_lock_for($now));
+    push(@lockers, $now) if($me->lock_held_for($now));
     return;
   });
   return @lockers;
+}
+
+sub lock_held_for {
+  my $self = shift;
+  return !$self->obtain_lock_for(@_);
 }
 
 sub _iterate {
